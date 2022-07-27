@@ -3,8 +3,8 @@ package test
 // import (
 // 	"encoding/json"
 // 	"fmt"
-// 	gsrc "github.com/JFJun/go-substrate-rpc-client/v3"
-// 	"github.com/JFJun/go-substrate-rpc-client/v3/types"
+// 	gsrc "github.com/centrifuge/go-substrate-rpc-client/v4"
+// 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 // 	"testing"
 // )
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/JFJun/bifrost-go/utils"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/huandu/xstrings"
 )
 
@@ -27,7 +27,6 @@ type iMetaVersion interface {
 func NewMetadataExpand(meta *types.Metadata) (*MetadataExpand, error) {
 	me := new(MetadataExpand)
 	me.meta = meta
-
 	switch meta.Version {
 	case 11:
 		me.MV = newV11(meta.AsMetadataV11.Modules)
@@ -115,7 +114,7 @@ func (v v14) GetCallIndex(moduleName, fn string) (callIdx string, err error) {
 	}()
 	ci, err := v.module.FindCallIndex(fmt.Sprintf("%s.%s", moduleName, fn))
 	fmt.Printf("%v ------ %v------- ---- FindCallIndex", ci, err)
-	return ci.String(), err
+	return xstrings.RightJustify(fmt.Sprintf("%x", ci.SectionIndex), 2, "0") + xstrings.RightJustify(fmt.Sprintf("%x", ci.MethodIndex), 2, "0"), err
 }
 
 func (v v14) FindNameByCallIndex(callIdx string) (moduleName, fn string, err error) {

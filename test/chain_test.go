@@ -6,7 +6,7 @@ package test
 // 	"github.com/JFJun/bifrost-go/expand"
 // 	"github.com/JFJun/bifrost-go/expand/base"
 // 	"github.com/JFJun/bifrost-go/expand/bifrost"
-// 	"github.com/JFJun/go-substrate-rpc-client/v3/types"
+// 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 // 	"reflect"
 // 	"strings"
 // 	"testing"

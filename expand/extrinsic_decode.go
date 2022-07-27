@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/JFJun/bifrost-go/utils"
-	"github.com/JFJun/go-substrate-rpc-client/v3/scale"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/huandu/xstrings"
 )
 

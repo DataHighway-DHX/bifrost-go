@@ -5,14 +5,15 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/JFJun/bifrost-go/uint128"
-	"github.com/JFJun/bifrost-go/utils"
-	"github.com/JFJun/go-substrate-rpc-client/v3/scale"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
-	"github.com/huandu/xstrings"
-	"github.com/shopspring/decimal"
 	"io"
 	"reflect"
+
+	"github.com/JFJun/bifrost-go/uint128"
+	"github.com/JFJun/bifrost-go/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/huandu/xstrings"
+	"github.com/shopspring/decimal"
 )
 
 type Balance struct {

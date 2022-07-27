@@ -2,9 +2,10 @@ package base
 
 import (
 	"fmt"
-	"github.com/JFJun/go-substrate-rpc-client/v3/scale"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
 	"math/big"
+
+	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 type Outcome struct {

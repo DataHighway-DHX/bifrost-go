@@ -3,7 +3,8 @@ package expand
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
+
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 /*
@@ -24,7 +25,7 @@ func NewCall(callIdx string, args ...interface{}) (types.Call, error) {
 	c := types.CallIndex{SectionIndex: m[0], MethodIndex: n[0]}
 	var a []byte
 	for _, arg := range args {
-		e, err := types.EncodeToBytes(arg)
+		e, err := types.Encode(arg)
 		if err != nil {
 			return types.Call{}, err
 		}

@@ -20,13 +20,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
 	"io"
 	"math/big"
 	"strings"
 
-	"github.com/JFJun/go-substrate-rpc-client/v3/scale"
-	"github.com/JFJun/go-substrate-rpc-client/v3/signature"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+
+	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 )
 
 const (
@@ -72,19 +73,19 @@ func (e *Extrinsic) UnmarshalJSON(bz []byte) error {
 	// extrinsics didn't have the length, cater for both approaches. This is very
 	// inconsistent with any other `Vec<u8>` implementation
 	var l types.UCompact
-	err := types.DecodeFromHexString(tmp, &l)
+	err := types.DecodeFromHex(tmp, &l)
 	if err != nil {
 		return err
 	}
 
-	prefix, err := types.EncodeToHexString(l)
+	prefix, err := types.EncodeToHex(l)
 	if err != nil {
 		return err
 	}
 
 	// determine whether length prefix is there
 	if strings.HasPrefix(tmp, prefix) {
-		return types.DecodeFromHexString(tmp, e)
+		return types.DecodeFromHex(tmp, e)
 	}
 
 	// not there, prepend with compact encoded length prefix
@@ -93,17 +94,17 @@ func (e *Extrinsic) UnmarshalJSON(bz []byte) error {
 		return err
 	}
 	length := types.NewUCompactFromUInt(uint64(len(dec)))
-	bprefix, err := types.EncodeToBytes(length)
+	bprefix, err := types.Encode(length)
 	if err != nil {
 		return err
 	}
 	prefixed := append(bprefix, dec...)
-	return types.DecodeFromBytes(prefixed, e)
+	return types.Decode(prefixed, e)
 }
 
 // MarshalJSON returns a JSON encoded byte array of Extrinsic
 func (e Extrinsic) MarshalJSON() ([]byte, error) {
-	s, err := types.EncodeToHexString(e)
+	s, err := types.EncodeToHex(e)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +127,7 @@ func (e *Extrinsic) Sign(signer signature.KeyringPair, o types.SignatureOptions)
 		return fmt.Errorf("unsupported extrinsic version: %v (isSigned: %v, type: %v)", e.Version, e.IsSigned(), e.Type())
 	}
 
-	mb, err := types.EncodeToBytes(e.Method)
+	mb, err := types.Encode(e.Method)
 	if err != nil {
 		return err
 	}
@@ -269,7 +270,7 @@ func NewExtrinsicCall(m *types.Metadata, call string, args ...interface{}) (type
 
 	var a []byte
 	for _, arg := range args {
-		e, err := types.EncodeToBytes(arg)
+		e, err := types.Encode(arg)
 		if err != nil {
 			return types.Call{}, err
 		}

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
+	"time"
 
 	"github.com/JFJun/bifrost-go/expand"
 	"github.com/JFJun/bifrost-go/models"
@@ -15,11 +17,11 @@ import (
 	"strconv"
 	"strings"
 
-	gsrc "github.com/JFJun/go-substrate-rpc-client/v3"
-	gsClient "github.com/JFJun/go-substrate-rpc-client/v3/client"
-	"github.com/JFJun/go-substrate-rpc-client/v3/rpc"
-	"github.com/JFJun/go-substrate-rpc-client/v3/scale"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
+	gsrc "github.com/centrifuge/go-substrate-rpc-client/v4"
+	gsClient "github.com/centrifuge/go-substrate-rpc-client/v4/client"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/rpc"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -154,16 +156,29 @@ func (c *Client) GetBlockByHash(blockHash types.Hash) (*models.BlockResponse, er
 	blockResp.ParentHash = block.Block.Header.ParentHash
 	blockResp.BlockHash = blockHash.Hex()
 
+	//TODO:
+	// sb, err := c.C.RPC.Chain.GetBlock(blockHash)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("get block error: %v", err)
+	// }
+
+	// ts, err := c.GetBlockTimestamp(sb)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("get block GetBlockTimestamp: %v", err)
+	// }
+
+	// fmt.Println("----- GetBlockTimestamp", ts, err)
+
 	if len(block.Block.Extrinsics) > 0 {
 		err = c.parseExtrinsicByDecode(block.Block.Extrinsics, blockResp)
 		if err != nil {
 			return nil, err
 		}
 
-		// err = c.parseExtrinsicByStorage(blockHash, blockResp)
-		// if err != nil {
-		// 	return nil, err
-		// }
+		err = c.parseExtrinsicByStorage(blockHash, blockResp, block.Block.Extrinsics)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return blockResp, nil
 }
@@ -218,13 +233,15 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 			return errors.New("unknown extrinsic decode response")
 		}
 
-		fmt.Printf("------ d = %s", d)
+		fmt.Printf("------ d = %s ------eeee\n\n\n", d)
 		err = json.Unmarshal(d, &resp)
 		if err != nil {
 			return fmt.Errorf("json unmarshal extrinsic decode error: %v", err)
 		}
 
-		fmt.Println("-------- resp.CallModule ", resp.CallModule)
+		fmt.Println("hehe")
+
+		// fmt.Println("-------- resp.CallModule ", resp.CallModule)
 		switch resp.CallModule {
 		case "Timestamp":
 			for _, param := range resp.Params {
@@ -329,7 +346,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 /*
 解析当前区块的System.event
 */
-func (c *Client) parseExtrinsicByStorage(blockHash types.Hash, blockResp *models.BlockResponse) error {
+func (c *Client) parseExtrinsicByStorage(blockHash types.Hash, blockResp *models.BlockResponse, extrinsics []string) error {
 	var (
 		eventKey types.StorageKey
 		err      error
@@ -382,78 +399,137 @@ func (c *Client) parseExtrinsicByStorage(blockHash types.Hash, blockResp *models
 		fmt.Printf("Transfer: %#x -> %#x: %v Planck\n", e.From, e.To, e.Value)
 	}
 
-	//解析event信息
-	ier, err := expand.DecodeEventRecords(c.Meta, raw.Hex(), c.ChainName)
-	if err != nil {
-		return fmt.Errorf("decode event data error: %v", err)
-	}
+	// //解析event信息
+	// ier, err := expand.DecodeEventRecords(c.Meta, raw.Hex(), c.ChainName)
+	// if err != nil {
+	// 	return fmt.Errorf("decode event data error: %v", err)
+	// }
 	// d, _ := json.Marshal(ier)
 	// fmt.Println("----- 解析event信息 \n\n\n\n\n", string(d))
-	var res []models.EventResult
-	failedMap := make(map[int]bool)
-	if len(ier.GetBalancesTransfer()) > 0 {
-		//有失败的交易
-		for _, failed := range ier.GetSystemExtrinsicFailed() {
-			if failed.Phase.IsApplyExtrinsic {
-				extrinsicIdx := failed.Phase.AsApplyExtrinsic
-				//记录到失败的map中
-				failedMap[int(extrinsicIdx)] = true
-			}
+	// var res []models.EventResult
+	// failedMap := make(map[int]bool)
+	// if len(ier.GetBalancesTransfer()) > 0 {
+	// 	//有失败的交易
+	// 	for _, failed := range ier.GetSystemExtrinsicFailed() {
+	// 		if failed.Phase.IsApplyExtrinsic {
+	// 			extrinsicIdx := failed.Phase.AsApplyExtrinsic
+	// 			//记录到失败的map中
+	// 			failedMap[int(extrinsicIdx)] = true
+	// 		}
+	// 	}
+
+	// 	for _, ebt := range ier.GetBalancesTransfer() {
+
+	// 		if !ebt.Phase.IsApplyExtrinsic {
+	// 			continue
+	// 		}
+	// 		extrinsicIdx := int(ebt.Phase.AsApplyExtrinsic)
+	// 		var r models.EventResult
+	// 		r.ExtrinsicIdx = extrinsicIdx
+	// 		fromHex := hex.EncodeToString(ebt.From[:])
+	// 		r.From, err = ss58.EncodeByPubHex(fromHex, c.prefix)
+	// 		if err != nil {
+	// 			r.From = ""
+	// 			continue
+	// 		}
+	// 		toHex := hex.EncodeToString(ebt.To[:])
+
+	// 		r.To, err = ss58.EncodeByPubHex(toHex, c.prefix)
+	// 		if err != nil {
+	// 			r.To = ""
+	// 			continue
+	// 		}
+	// 		r.Amount = ebt.Value.String()
+	// 		//r.Weight = c.getWeight(&events, r.ExtrinsicIdx)
+	// 		res = append(res, r)
+	// 	}
+	// }
+
+	for _, tr := range events.Balances_Transfer {
+		edr, err := c.getExtrinsicDecodeResponse(extrinsics[tr.Phase.AsApplyExtrinsic])
+		if err != nil {
+			return fmt.Errorf("couldn't get extrinsic decode response")
 		}
-
-		for _, ebt := range ier.GetBalancesTransfer() {
-
-			if !ebt.Phase.IsApplyExtrinsic {
-				continue
-			}
-			extrinsicIdx := int(ebt.Phase.AsApplyExtrinsic)
-			var r models.EventResult
-			r.ExtrinsicIdx = extrinsicIdx
-			fromHex := hex.EncodeToString(ebt.From[:])
-			r.From, err = ss58.EncodeByPubHex(fromHex, c.prefix)
-			if err != nil {
-				r.From = ""
-				continue
-			}
-			toHex := hex.EncodeToString(ebt.To[:])
-
-			r.To, err = ss58.EncodeByPubHex(toHex, c.prefix)
-			if err != nil {
-				r.To = ""
-				continue
-			}
-			r.Amount = ebt.Value.String()
-			//r.Weight = c.getWeight(&events, r.ExtrinsicIdx)
-			res = append(res, r)
-		}
+		fee, _ := c.GetPartialFee(extrinsics[tr.Phase.AsApplyExtrinsic], blockResp.ParentHash)
+		blockResp.Extrinsic = append(blockResp.Extrinsic,
+			&models.ExtrinsicResponse{
+				Type:            "transfer",
+				Status:          "success",
+				Amount:          tr.Value.String(),
+				FromAddress:     fmt.Sprintf("%#x", tr.From),
+				ToAddress:       fmt.Sprintf("%#x", tr.To),
+				EventIndex:      int(tr.Phase.AsApplyExtrinsic),
+				Txid:            c.createTxHash(extrinsics[tr.Phase.AsApplyExtrinsic]),
+				Fee:             fee,
+				Era:             edr.Era,
+				Signature:       edr.Signature,
+				Nonce:           edr.Nonce,
+				ExtrinsicIndex:  int(tr.Phase.AsApplyExtrinsic),
+				ExtrinsicLength: edr.Length,
+			})
 	}
 
-	for _, e := range blockResp.Extrinsic {
-		e.Status = "fail"
-		e.Type = "transfer"
-		if len(res) > 0 {
-			for _, r := range res {
-				if e.ExtrinsicIndex == r.ExtrinsicIdx {
-					if e.ToAddress == r.To {
-						if failedMap[e.ExtrinsicIndex] {
-							e.Status = "fail"
-						} else {
-							e.Status = "success"
-						}
-						e.Type = "transfer"
-						e.Amount = r.Amount
-						e.ToAddress = r.To
+	// for _, e := range blockResp.Extrinsic {
+	// 	e.Status = "fail"
+	// 	e.Type = "transfer"
+	// 	if len(res) > 0 {
+	// 		for _, r := range res {
+	// 			if e.ExtrinsicIndex == r.ExtrinsicIdx {
+	// 				if e.ToAddress == r.To {
+	// 					if failedMap[e.ExtrinsicIndex] {
+	// 						e.Status = "fail"
+	// 					} else {
+	// 						e.Status = "success"
+	// 					}
+	// 					e.Type = "transfer"
+	// 					e.Amount = r.Amount
+	// 					e.ToAddress = r.To
 
-						fmt.Printf("------ transfer from %v to %v amt %v", e.FromAddress, e.ToAddress, e.Amount)
-						//计算手续费
-						//e.Fee = c.calcFee(&events, e.ExtrinsicIndex)
-					}
-				}
-			}
-		}
-	}
+	// 					fmt.Printf("------ transfer from %v to %v amt %v", e.FromAddress, e.ToAddress, e.Amount)
+	// 					//计算手续费
+	// 					//e.Fee = c.calcFee(&events, e.ExtrinsicIndex)
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	return nil
+}
+
+// func (c *Client) getTransferStatusByExtrinsicId(id int32) (*models.ExtrinsicDecodeResponse, error) {
+
+// }
+
+func (c *Client) getExtrinsicDecodeResponse(extrinsic string) (*models.ExtrinsicDecodeResponse, error) {
+	extrinsic = utils.Remove0X(extrinsic)
+	data, err := hex.DecodeString(extrinsic)
+	if err != nil {
+		return nil, fmt.Errorf("hex.decode extrinsic error: %v", err)
+	}
+
+	decoder := scale.NewDecoder(bytes.NewReader(data))
+	ed, err := expand.NewExtrinsicDecoder(c.Meta)
+	if err != nil {
+		return nil, fmt.Errorf("new extrinsic decode error: %v", err)
+	}
+
+	err = ed.ProcessExtrinsicDecoder(*decoder)
+	if err != nil {
+		return nil, fmt.Errorf("decode extrinsic error: %v", err)
+	}
+	var resp models.ExtrinsicDecodeResponse
+	d, _ := json.Marshal(ed.Value)
+	if len(d) == 0 {
+		return nil, errors.New("unknown extrinsic decode response")
+	}
+
+	err = json.Unmarshal(d, &resp)
+	if err != nil {
+		return nil, fmt.Errorf("json unmarshal extrinsic decode error: %v", err)
+	}
+
+	return &resp, nil
 }
 
 /*
@@ -465,48 +541,49 @@ func (c *Client) createTxHash(extrinsic string) string {
 	return "0x" + hex.EncodeToString(d[:])
 }
 
-/*
-根据地址获取地址的账户信息，包括nonce以及余额等
-*/
-func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
-	var (
-		storage types.StorageKey
-		err     error
-		pub     []byte
-	)
-	defer func() {
-		if err1 := recover(); err1 != nil {
-			err = fmt.Errorf("panic decode event: %v", err1)
-		}
-	}()
-	err = c.checkRuntimeVersion()
-	if err != nil {
-		return nil, err
-	}
-	pub, err = ss58.DecodeToPub(address)
-	if err != nil {
-		return nil, fmt.Errorf("ss58 decode address error: %v", err)
-	}
-	storage, err = types.CreateStorageKey(c.Meta, "System", "Account", pub, nil)
-	if err != nil {
-		return nil, fmt.Errorf("create System.Account storage error: %v", err)
-	}
-	h, _ := c.C.RPC.Chain.GetBlockHashLatest()
-	raw, err := c.C.RPC.State.GetStorageRaw(storage, h)
-	if err != nil {
-		fmt.Println(1111)
-	}
-	fmt.Println("Key:", storage.Hex())
-	fmt.Println(len(*raw))
-	fmt.Println(raw.Hex())
-	fmt.Println(len(raw.Hex()))
+// // TODO: GetAccountInfo
+// /*
+// 根据地址获取地址的账户信息，包括nonce以及余额等
+// */
+// func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
+// 	var (
+// 		storage types.StorageKey
+// 		err     error
+// 		pub     []byte
+// 	)
+// 	defer func() {
+// 		if err1 := recover(); err1 != nil {
+// 			err = fmt.Errorf("panic decode event: %v", err1)
+// 		}
+// 	}()
+// 	err = c.checkRuntimeVersion()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	pub, err = ss58.DecodeToPub(address)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("ss58 decode address error: %v", err)
+// 	}
+// 	storage, err = types.CreateStorageKey(c.Meta, "System", "Account", pub, nil)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("create System.Account storage error: %v", err)
+// 	}
+// 	h, _ := c.C.RPC.Chain.GetBlockHashLatest()
+// 	raw, err := c.C.RPC.State.GetStorageRaw(storage, h)
+// 	if err != nil {
+// 		fmt.Println(1111)
+// 	}
+// 	fmt.Println("Key:", storage.Hex())
+// 	fmt.Println(len(*raw))
+// 	fmt.Println(raw.Hex())
+// 	fmt.Println(len(raw.Hex()))
 
-	accountInfo, err := c.C.RPC.State.GetStorageAccountInfo(storage, h)
-	if err != nil {
-		return nil, fmt.Errorf("get account info error: %v", err)
-	}
-	return accountInfo, nil
-}
+// 	accountInfo, err := c.C.RPC.State.GetStorageAccountInfo(storage, h)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("get account info error: %v", err)
+// 	}
+// 	return accountInfo, nil
+// }
 
 /*
 获取外部交易extrinsic的手续费
@@ -528,4 +605,29 @@ func (c *Client) GetPartialFee(extrinsic, parentHash string) (string, error) {
 		return "", fmt.Errorf("partialFee is not string type: %v", result["partialFee"])
 	}
 	return fee, nil
+}
+
+func (c *Client) GetBlockTimestamp(block *types.SignedBlock) (*time.Time, error) {
+
+	// callIndex needed to find correct Extrinsic
+	callIndex, err := c.Meta.FindCallIndex("Timestamp.set")
+	if err != nil {
+		return nil, err
+	}
+
+	timestamp := new(big.Int)
+	for _, extrinsic := range block.Block.Extrinsics {
+		if extrinsic.Method.CallIndex != callIndex {
+			continue
+		}
+		timeDecoder := scale.NewDecoder(bytes.NewReader(extrinsic.Method.Args))
+		timestamp, err = timeDecoder.DecodeUintCompact()
+		if err != nil {
+			return nil, err
+		}
+		break
+	}
+	msec := timestamp.Int64()
+	time := time.Unix(msec/1e3, (msec%1e3)*1e6)
+	return &time, nil
 }

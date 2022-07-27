@@ -1,6 +1,6 @@
 package base
 
-import "github.com/JFJun/go-substrate-rpc-client/v3/types"
+import "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 
 type HrmpChannelId struct {
 	Sender   types.U32

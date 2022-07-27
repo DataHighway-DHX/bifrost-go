@@ -3,12 +3,13 @@ package tx
 import (
 	"encoding/hex"
 	"fmt"
+	"strings"
+
 	"github.com/JFJun/bifrost-go/expand"
 	"github.com/JFJun/bifrost-go/utils"
 	"github.com/JFJun/go-substrate-crypto/crypto"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"golang.org/x/crypto/blake2b"
-	"strings"
 )
 
 /*
@@ -105,14 +106,14 @@ func (tx *SubstrateTransaction) SignTransaction(privateKey string, signType int)
 	if err != nil {
 		return "", fmt.Errorf("sign error: %v", err)
 	}
-	return types.EncodeToHexString(e)
+	return types.EncodeToHex(e)
 }
 
 func (tx *SubstrateTransaction) signTx(e *expand.Extrinsic, o types.SignatureOptions, privateKey string, signType int) error {
 	if e.Type() != types.ExtrinsicVersion4 {
 		return fmt.Errorf("unsupported extrinsic version: %v (isSigned: %v, type: %v)", e.Version, e.IsSigned(), e.Type())
 	}
-	mb, err := types.EncodeToBytes(e.Method)
+	mb, err := types.Encode(e.Method)
 	if err != nil {
 		return err
 	}
@@ -133,7 +134,7 @@ func (tx *SubstrateTransaction) signTx(e *expand.Extrinsic, o types.SignatureOpt
 		TransactionVersion: o.TransactionVersion,
 	}
 	// sign
-	data, err := types.EncodeToBytes(payload)
+	data, err := types.Encode(payload)
 	if err != nil {
 		return fmt.Errorf("encode payload error: %v", err)
 	}
@@ -165,7 +166,8 @@ func (tx *SubstrateTransaction) signTx(e *expand.Extrinsic, o types.SignatureOpt
 	} else if signType == crypto.Sr25519Type {
 		ss = types.MultiSignature{IsSr25519: true, AsSr25519: types.NewSignature(sig)}
 	} else if signType == crypto.EcdsaType {
-		ss = types.MultiSignature{IsEcdsa: true, AsEcdsa: types.NewBytes(sig)}
+		// TODO:
+		// ss = types.MultiSignature{IsEcdsa: true, AsEcdsa: types.NewBytes(sig)}
 	} else {
 		return fmt.Errorf("unsupport sign type : %d", signType)
 	}

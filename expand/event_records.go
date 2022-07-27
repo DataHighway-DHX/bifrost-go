@@ -8,8 +8,8 @@ import (
 	"github.com/JFJun/bifrost-go/expand/bifrost"
 	"github.com/JFJun/bifrost-go/expand/kusama"
 	"github.com/JFJun/bifrost-go/expand/polkadot"
-	"github.com/JFJun/go-substrate-rpc-client/v3/scale"
-	"github.com/JFJun/go-substrate-rpc-client/v3/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 type IEventRecords interface {
@@ -39,8 +39,16 @@ func DecodeEventRecords(meta *types.Metadata, rawData string, chainName string) 
 			return nil, err
 		}
 		ier = &events
-	case "bifrost-parachain", "datahighway-parachain":
+	case "bifrost-parachain":
 		var events bifrost.BifrostEventRecords
+		err := e.DecodeEventRecords(meta, &events)
+		if err != nil {
+			return nil, err
+		}
+		ier = &events
+	case "datahighway-parachain":
+		fmt.Println("-----------ebbbbbbbbloooo")
+		var events kusama.KusamaEventRecords
 		err := e.DecodeEventRecords(meta, &events)
 		if err != nil {
 			return nil, err
@@ -92,7 +100,7 @@ func DecodeEventRecordsNew(m *types.Metadata, e types.EventRecordsRaw) (IEventRe
 		if err != nil {
 			return nil, fmt.Errorf("unable to find event with EventID %v in metadata for event #%v: %s", id, i, err)
 		}
-		en := fmt.Sprintf("%v_%v", moduleName, eventName)
+		en := fmt.Sprintf("moduleName%v_%v", moduleName, eventName)
 		fmt.Println(en)
 		// todo get Args
 		var args []types.Type // test
