@@ -7,6 +7,7 @@ package expand
 */
 import (
 	"fmt"
+
 	"github.com/JFJun/bifrost-go/utils"
 	"github.com/JFJun/go-substrate-rpc-client/v3/scale"
 	"github.com/JFJun/go-substrate-rpc-client/v3/types"
@@ -49,6 +50,7 @@ func NewExtrinsicDecoder(meta *types.Metadata) (*ExtrinsicDecoder, error) {
 }
 
 func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder) error {
+
 	var length types.UCompact
 	err := decoder.Decode(&length)
 	if err != nil {
@@ -135,11 +137,13 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder) error
 	} else {
 		return fmt.Errorf("extrinsics version %s is not support", ed.VersionInfo)
 	}
+
+	fmt.Println("------ ed.CallIndex", ed.CallIndex)
 	if ed.CallIndex != "" {
 		_ = ed.decodeCallIndex(decoder)
-		//if err != nil {
-		//	return err
-		//}
+		// if err != nil {
+		// 	return err
+		// }
 	}
 	result := map[string]interface{}{
 		"extrinsic_length": ed.ExtrinsicLength,
@@ -168,11 +172,11 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder) error
 func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 	var err error
 	//避免指针为空
-	defer func() {
-		if errs := recover(); errs != nil {
-			err = fmt.Errorf("decode call catch panic ,err=%v", errs)
-		}
-	}()
+	// defer func() {
+	// 	if errs := recover(); errs != nil {
+	// 		err = fmt.Errorf("decode call catch panic ,err=%v", errs)
+	// 	}
+	// }()
 	//	解析 call index
 	// 这里只能硬编码了，因为decode函数的原因，无法动态的根据type name去解析
 	// 这里我只解析自己想要的，比如说Timestamp,Balance.transfer,Utility.batch
@@ -182,6 +186,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 	}
 	ed.CallModule = modName
 	ed.CallModuleFunction = callName
+
+	fmt.Printf(" modName ----- %s\n\n\n ", modName)
 	switch modName {
 	case "Timestamp":
 		if callName == "set" {

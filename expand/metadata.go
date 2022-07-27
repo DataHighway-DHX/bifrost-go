@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+
 	"github.com/JFJun/bifrost-go/utils"
 	"github.com/JFJun/go-substrate-rpc-client/v3/types"
 	"github.com/huandu/xstrings"
@@ -26,19 +27,20 @@ type iMetaVersion interface {
 func NewMetadataExpand(meta *types.Metadata) (*MetadataExpand, error) {
 	me := new(MetadataExpand)
 	me.meta = meta
-	if meta.Version >= 14 {
-		me.MV = newV14UpGrade(meta)
-		return me, nil
-	}
-	if meta.IsMetadataV11 {
+
+	switch meta.Version {
+	case 11:
 		me.MV = newV11(meta.AsMetadataV11.Modules)
-	} else if meta.IsMetadataV12 {
+	case 12:
 		me.MV = newV12(meta.AsMetadataV12.Modules)
-	} else if meta.IsMetadataV13 {
+	case 13:
 		me.MV = newV13(meta.AsMetadataV13.Modules)
-	} else {
-		return nil, errors.New("metadata version is not v11 or v12 or 13")
+	case 14:
+		me.MV = newV14(meta)
+	default:
+		return nil, errors.New("metadata version is not v11 or v12 or 13 or 14")
 	}
+
 	return me, nil
 }
 
@@ -47,26 +49,106 @@ func: 没办法，只能适应之前写的啰
 author: flynn
 date: 2021/10/29
 */
-type v14Upgrade struct {
-	meta *types.Metadata
-}
+// type v14Upgrade struct {
+// 	meta *types.Metadata
+// }
 
-func newV14UpGrade(meta *types.Metadata) *v14Upgrade {
-	v := new(v14Upgrade)
-	v.meta = meta
+// func newV14UpGrade(meta *types.Metadata) *v14Upgrade {
+// 	v := new(v14Upgrade)
+// 	v.meta = meta
+// 	return v
+// }
+
+// // TODO:
+// func (v v14Upgrade) GetCallIndex(moduleName, fn string) (callIdx string, err error) {
+// 	return v.meta.GetCallIndex(moduleName, fn)
+// }
+
+// func (v v14Upgrade) FindNameByCallIndex(callIdx string) (moduleName, fn string, err error) {
+// 	for _, mod := range m.Pallets {
+// 		if !mod.HasEvents {
+// 			continue
+// 		}
+// 		if mod.Index != NewU8(eventID[0]) {
+// 			continue
+// 		}
+// 		eventType := mod.Events.Type.Int64()
+
+// 		if typ, ok := m.EfficientLookup[eventType]; ok {
+// 			if len(typ.Def.Variant.Variants) > 0 {
+// 				for _, vars := range typ.Def.Variant.Variants {
+// 					if uint8(vars.Index) == eventID[1] {
+// 						return mod.Name, vars.Name, nil
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return "", "", fmt.Errorf("module index %v out of range", eventID[0])
+
+// 	return "", "", fmt.Errorf("do not find this callInx info: %s", callIdx)
+// }
+
+// func (v v14Upgrade) GetConstants(modName, constantsName string) (constantsType string, constantsValue []byte, err error) {
+// 	v.meta.FindConstantValue(modName, constantsName)
+// 	v.meta.AsMetadataV14.Type
+// 	return v.meta.GetConstants(modName, constantsName)
+// }
+
+func newV14(module *types.Metadata) *v14 {
+	v := new(v14)
+	v.module = *module
 	return v
 }
 
-func (v v14Upgrade) GetCallIndex(moduleName, fn string) (callIdx string, err error) {
-	return v.meta.GetCallIndex(moduleName, fn)
+type v14 struct {
+	module types.Metadata
 }
 
-func (v v14Upgrade) FindNameByCallIndex(callIdx string) (moduleName, fn string, err error) {
-	return v.meta.FindNameByCallIndex(callIdx)
+func (v v14) GetCallIndex(moduleName, fn string) (callIdx string, err error) {
+	fmt.Println("------- GetCallIndex")
+	defer func() {
+		if errs := recover(); errs != nil {
+			callIdx = ""
+			err = fmt.Errorf("catch panic ,err=%v", errs)
+		}
+	}()
+	ci, err := v.module.FindCallIndex(fmt.Sprintf("%s.%s", moduleName, fn))
+	fmt.Printf("%v ------ %v------- ---- FindCallIndex", ci, err)
+	return ci.String(), err
 }
 
-func (v v14Upgrade) GetConstants(modName, constantsName string) (constantsType string, constantsValue []byte, err error) {
-	return v.meta.GetConstants(modName, constantsName)
+func (v v14) FindNameByCallIndex(callIdx string) (moduleName, fn string, err error) {
+	if len(callIdx) != 4 {
+		return "", "", fmt.Errorf("call index length is not equal 4: length: %d", len(callIdx))
+	}
+	data, err := hex.DecodeString(callIdx)
+	if err != nil {
+		return "", "", fmt.Errorf("call index is not hex string")
+	}
+
+	mn, fun, err := v.module.FindEventNamesForEventID(types.EventID{
+		data[0], data[1],
+	})
+
+	fmt.Printf("%s ------ %s------- %s ---- FindNameByCallIndex", string(mn), string(fun), err)
+
+	return string(mn), string(fun), err
+}
+
+func (v v14) GetConstants(modName, constantsName string) (constantsType string, constantsValue []byte, err error) {
+	// defer func() {
+	// 	if errs := recover(); errs != nil {
+	// 		err = fmt.Errorf("catch panic ,err=%v", errs)
+	// 	}
+	// }()
+
+	fmt.Println("------- GetConstants")
+	val, err := v.module.FindConstantValue(modName, constantsName)
+
+	fmt.Printf("%s ------ %s------- ---- FindConstantValue", val, err)
+
+	return string(rune(v.module.AsMetadataV14.Type.Int64())), val, err
 }
 
 type v11 struct {
