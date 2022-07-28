@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/JFJun/bifrost-go/client"
-	"github.com/JFJun/go-substrate-crypto/ss58"
+	"github.com/JFJun/bifrost-go/crypto/ss58"
 )
 
 func Test_GetBlockByNumber(t *testing.T) {

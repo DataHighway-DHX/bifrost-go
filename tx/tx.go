@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/JFJun/bifrost-go/crypto"
 	"github.com/JFJun/bifrost-go/expand"
 	"github.com/JFJun/bifrost-go/utils"
-	"github.com/JFJun/go-substrate-crypto/crypto"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"golang.org/x/crypto/blake2b"
 )

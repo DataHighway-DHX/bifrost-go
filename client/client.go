@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/JFJun/go-substrate-crypto/ss58"
+	"github.com/JFJun/bifrost-go/crypto/ss58"
 
 	"strings"
 
