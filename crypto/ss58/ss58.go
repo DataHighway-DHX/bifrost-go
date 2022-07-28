@@ -3,7 +3,8 @@ package ss58
 import (
 	"encoding/hex"
 	"errors"
-	"github.com/btcsuite/btcutil/base58"
+
+	"github.com/decred/base58"
 	"golang.org/x/crypto/blake2b"
 )
 

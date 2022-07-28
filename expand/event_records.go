@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/JFJun/bifrost-go/expand/bifrost"
-	"github.com/JFJun/bifrost-go/expand/kusama"
-	"github.com/JFJun/bifrost-go/expand/polkadot"
+	"github.com/DataHighway-DHX/bifrost-go/expand/bifrost"
+	"github.com/DataHighway-DHX/bifrost-go/expand/kusama"
+	"github.com/DataHighway-DHX/bifrost-go/expand/polkadot"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JFJun/bifrost-go/crypto"
-	"github.com/JFJun/bifrost-go/crypto/ss58"
+	"github.com/DataHighway-DHX/bifrost-go/crypto"
+	"github.com/DataHighway-DHX/bifrost-go/crypto/ss58"
 )
 
 func TestEcdsaCreateKey(t *testing.T) {

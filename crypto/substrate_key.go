@@ -3,10 +3,10 @@ package crypto
 import (
 	"fmt"
 
-	"github.com/JFJun/bifrost-go/crypto/ecdsa"
-	"github.com/JFJun/bifrost-go/crypto/ed25519"
-	"github.com/JFJun/bifrost-go/crypto/sr25519"
-	"github.com/JFJun/bifrost-go/crypto/ss58"
+	"github.com/DataHighway-DHX/bifrost-go/crypto/ecdsa"
+	"github.com/DataHighway-DHX/bifrost-go/crypto/ed25519"
+	"github.com/DataHighway-DHX/bifrost-go/crypto/sr25519"
+	"github.com/DataHighway-DHX/bifrost-go/crypto/ss58"
 )
 
 const (

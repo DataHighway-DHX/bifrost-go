@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	sr25519 "github.com/ChainSafe/go-schnorrkel"
-	"github.com/JFJun/bifrost-go/crypto/ss58"
+	"github.com/DataHighway-DHX/bifrost-go/crypto/ss58"
 	r255 "github.com/gtank/ristretto255"
 )
 

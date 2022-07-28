@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/JFJun/bifrost-go/models"
+	"github.com/DataHighway-DHX/bifrost-go/models"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"golang.org/x/crypto/blake2b"

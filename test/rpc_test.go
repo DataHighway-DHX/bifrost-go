@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JFJun/bifrost-go/client"
-	"github.com/JFJun/bifrost-go/crypto/ss58"
+	"github.com/DataHighway-DHX/bifrost-go/client"
+	"github.com/DataHighway-DHX/bifrost-go/crypto/ss58"
 )
 
 func Test_GetBlockByNumber(t *testing.T) {

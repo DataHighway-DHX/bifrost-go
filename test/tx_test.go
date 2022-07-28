@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JFJun/bifrost-go/client"
-	"github.com/JFJun/bifrost-go/crypto"
-	"github.com/JFJun/bifrost-go/expand"
-	"github.com/JFJun/bifrost-go/tx"
+	"github.com/DataHighway-DHX/bifrost-go/client"
+	"github.com/DataHighway-DHX/bifrost-go/crypto"
+	"github.com/DataHighway-DHX/bifrost-go/expand"
+	"github.com/DataHighway-DHX/bifrost-go/tx"
 )
 
 func Test_Tx2(t *testing.T) {

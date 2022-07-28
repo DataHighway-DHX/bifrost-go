@@ -8,11 +8,10 @@ import (
 	"io"
 	"reflect"
 
-	"github.com/JFJun/bifrost-go/uint128"
-	"github.com/JFJun/bifrost-go/utils"
+	"github.com/DataHighway-DHX/bifrost-go/uint128"
+	"github.com/DataHighway-DHX/bifrost-go/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/huandu/xstrings"
 	"github.com/shopspring/decimal"
 )
 
@@ -73,56 +72,56 @@ func (v *Vec) ProcessVec(decoder scale.Decoder, subType interface{}) error {
 	return nil
 }
 
-/*
-解码包的问题，所以这里只能根据需求写死
-*/
-type TransferCall struct {
-	Value interface{}
-}
+// /*
+// 解码包的问题，所以这里只能根据需求写死
+// */
+// type TransferCall struct {
+// 	Value interface{}
+// }
 
-func (t *TransferCall) Decode(decoder scale.Decoder) error {
-	//1. Get callidx first
-	b := make([]byte, 2)
-	err := decoder.Read(b)
-	if err != nil {
-		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
-	}
-	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
-	result := map[string]interface{}{
-		"call_index": callIdx,
-	}
-	var param []ExtrinsicParam
-	// 0 ---> 	Address
-	var address MultiAddress
-	err = decoder.Decode(&address)
-	if err != nil {
-		return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
-	}
-	param = append(param,
-		ExtrinsicParam{
-			Name:     "dest",
-			Type:     "Address",
-			Value:    utils.BytesToHex(address.AccountId[:]),
-			ValueRaw: utils.BytesToHex(address.AccountId[:]),
-		})
-	// 1 ----> Compact<Balance>
-	var bb types.UCompact
+// func (t *TransferCall) Decode(decoder scale.Decoder) error {
+// 	//1. Get callidx first
+// 	b := make([]byte, 2)
+// 	err := decoder.Read(b)
+// 	if err != nil {
+// 		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
+// 	}
+// 	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
+// 	result := map[string]interface{}{
+// 		"call_index": callIdx,
+// 	}
+// 	var param []ExtrinsicParam
+// 	// 0 ---> 	Address
+// 	var address MultiAddress
+// 	err = decoder.Decode(&address)
+// 	if err != nil {
+// 		return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+// 	}
+// 	param = append(param,
+// 		ExtrinsicParam{
+// 			Name:     "dest",
+// 			Type:     "Address",
+// 			Value:    utils.BytesToHex(address.AccountId[:]),
+// 			ValueRaw: utils.BytesToHex(address.AccountId[:]),
+// 		})
+// 	// 1 ----> Compact<Balance>
+// 	var bb types.UCompact
 
-	err = decoder.Decode(&bb)
-	if err != nil {
-		return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
-	}
-	v := utils.UCompactToBigInt(bb).Int64()
-	param = append(param,
-		ExtrinsicParam{
-			Name:  "value",
-			Type:  "Compact<Balance>",
-			Value: v,
-		})
-	result["call_args"] = param
-	t.Value = result
-	return nil
-}
+// 	err = decoder.Decode(&bb)
+// 	if err != nil {
+// 		return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
+// 	}
+// 	v := utils.UCompactToBigInt(bb).Int64()
+// 	param = append(param,
+// 		ExtrinsicParam{
+// 			Name:  "value",
+// 			Type:  "Compact<Balance>",
+// 			Value: v,
+// 		})
+// 	result["call_args"] = param
+// 	t.Value = result
+// 	return nil
+// }
 
 type Address struct {
 	AccountLength string `json:"account_length"`
