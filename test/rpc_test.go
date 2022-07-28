@@ -16,10 +16,7 @@ func Test_GetBlockByNumber(t *testing.T) {
 		t.Fatal(err)
 	}
 	c.SetPrefix(ss58.DataHighwayPrefix)
-	//expand.SetSerDeOptions(false)
-	/*
-		Ksm: 7834050
-	*/
+
 	resp, err := c.GetBlockByNumber(13953)
 	if err != nil {
 		t.Fatal(err)

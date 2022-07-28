@@ -11,30 +11,36 @@ import (
 )
 
 func Test_Tx2(t *testing.T) {
-	// 1. 初始化rpc客户端
+
 	c, err := client.New("")
 	if err != nil {
 		t.Fatal(err)
 	}
-	//2. 如果某些链（例如：chainX)的地址的字节前面需要0xff,则下面这个值设置为false
+
+	// If the address of some chains (eg: chainX) requires 0xff
+	//in front of the byte, then the following value is set to false
+
 	//expand.SetSerDeOptions(false)
 	from := ""
 	to := ""
 	amount := uint64(10000000000)
-	//3. 获取from地址的nonce
+
+	// Get the nonce of the from address
 	acc, err := c.GetAccountInfo(from)
 	if err != nil {
 		t.Fatal(err)
 	}
 	nonce := uint64(acc.Nonce)
-	//4. 创建一个substrate交易，这个方法满足所有遵循substrate 的交易结构的链
+	// Create a substrate transaction, this method satisfies all
+	// chains that follow the transaction structure of substrate
 	transaction := tx.NewSubstrateTransaction(from, nonce)
-	//5. 初始化metadata的扩张结构
+
+	// Initialize the metadata expansion structure
 	ed, err := expand.NewMetadataExpand(c.Meta)
 	if err != nil {
 		t.Fatal(err)
 	}
-	//6. 初始化Balances.transfer的call方法
+	// Initialize the call method of Balances.transfer
 	call, err := ed.BalanceTransferCall(to, amount)
 	if err != nil {
 		t.Fatal(err)
@@ -52,22 +58,22 @@ func Test_Tx2(t *testing.T) {
 		ubtc,err:=ed.UtilityBatchTxCall(toAmount,false)
 	*/
 
-	//7. 设置交易的必要参数
+	// Set the necessary parameters for the transaction
 	transaction.SetGenesisHashAndBlockHash(c.GetGenesisHash(), c.GetGenesisHash()).
 		SetSpecAndTxVersion(uint32(c.SpecVersion), uint32(c.TransactionVersion)).
 		SetCall(call) //设置call
-	//8. 签名交易
+	// Signed transaction
 	sig, err := transaction.SignTransaction("", crypto.Sr25519Type)
 	if err != nil {
 		t.Fatal(err)
 	}
-	//9. 提交交易
+
 	var result interface{}
 	err = c.C.Client.Call(&result, "author_submitExtrinsic", sig)
 	if err != nil {
 		t.Fatal(err)
 	}
-	//10. txid
+	// get txid
 	txid := result.(string)
 	fmt.Println(txid)
 }

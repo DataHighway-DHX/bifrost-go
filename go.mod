@@ -32,4 +32,4 @@ require (
 
 // replace github.com/centrifuge/go-substrate-rpc-client/v4 => /Users/jekabolt/go/src/github.com/JFJun/go-substrate-rpc-client
 
-replace github.com/centrifuge/go-substrate-rpc-client/v4 => /Users/jekabolt/go/src/github.com/centrifuge/go-substrate-rpc-client
+// replace github.com/centrifuge/go-substrate-rpc-client/v4 => /Users/jekabolt/go/src/github.com/centrifuge/go-substrate-rpc-client

@@ -81,7 +81,7 @@ type TransferCall struct {
 }
 
 func (t *TransferCall) Decode(decoder scale.Decoder) error {
-	//1. 先获取callidx
+	//1. Get callidx first
 	b := make([]byte, 2)
 	err := decoder.Read(b)
 	if err != nil {
