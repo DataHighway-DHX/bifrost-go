@@ -8,8 +8,8 @@ import (
 	"io"
 	"reflect"
 
-	"github.com/DataHighway-DHX/bifrost-go/uint128"
-	"github.com/DataHighway-DHX/bifrost-go/utils"
+	"github.com/DataHighway-DHX/substrate-go/uint128"
+	"github.com/DataHighway-DHX/substrate-go/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/shopspring/decimal"

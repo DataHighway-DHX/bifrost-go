@@ -1,4 +1,4 @@
-module github.com/DataHighway-DHX/bifrost-go
+module github.com/DataHighway-DHX/substrate-go
 
 go 1.18
 

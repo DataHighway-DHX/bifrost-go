@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/DataHighway-DHX/bifrost-go/crypto"
-	"github.com/DataHighway-DHX/bifrost-go/expand"
-	"github.com/DataHighway-DHX/bifrost-go/utils"
+	"github.com/DataHighway-DHX/substrate-go/crypto"
+	"github.com/DataHighway-DHX/substrate-go/expand"
+	"github.com/DataHighway-DHX/substrate-go/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"golang.org/x/crypto/blake2b"
 )

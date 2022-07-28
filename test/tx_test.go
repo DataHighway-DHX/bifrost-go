@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/DataHighway-DHX/bifrost-go/client"
-	"github.com/DataHighway-DHX/bifrost-go/crypto"
-	"github.com/DataHighway-DHX/bifrost-go/expand"
-	"github.com/DataHighway-DHX/bifrost-go/tx"
+	"github.com/DataHighway-DHX/substrate-go/client"
+	"github.com/DataHighway-DHX/substrate-go/crypto"
+	"github.com/DataHighway-DHX/substrate-go/expand"
+	"github.com/DataHighway-DHX/substrate-go/tx"
 )
 
 func Test_Tx2(t *testing.T) {

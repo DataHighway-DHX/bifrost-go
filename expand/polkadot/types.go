@@ -1,7 +1,7 @@
 package polkadot
 
 import (
-	"github.com/DataHighway-DHX/bifrost-go/expand/base"
+	"github.com/DataHighway-DHX/substrate-go/expand/base"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 

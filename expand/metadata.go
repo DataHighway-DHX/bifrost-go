@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/DataHighway-DHX/bifrost-go/utils"
+	"github.com/DataHighway-DHX/substrate-go/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/huandu/xstrings"
 )

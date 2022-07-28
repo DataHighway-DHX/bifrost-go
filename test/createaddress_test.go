@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/DataHighway-DHX/bifrost-go/crypto/ss58"
+	"github.com/DataHighway-DHX/substrate-go/crypto/ss58"
 )
 
 func Test_CreateAddress(t *testing.T) {

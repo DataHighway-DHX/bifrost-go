@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/DataHighway-DHX/bifrost-go/crypto/ss58"
+	"github.com/DataHighway-DHX/substrate-go/crypto/ss58"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
