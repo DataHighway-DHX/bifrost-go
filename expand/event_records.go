@@ -47,7 +47,6 @@ func DecodeEventRecords(meta *types.Metadata, rawData string, chainName string) 
 		}
 		ier = &events
 	case "datahighway-parachain":
-		fmt.Println("-----------ebbbbbbbbloooo")
 		var events kusama.KusamaEventRecords
 		err := e.DecodeEventRecords(meta, &events)
 		if err != nil {

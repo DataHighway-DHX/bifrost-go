@@ -10,6 +10,7 @@ import (
 )
 
 func Test_GetBlockByNumber(t *testing.T) {
+
 	c, err := client.New("wss://tanganika.datahighway.com")
 	if err != nil {
 		t.Fatal(err)
