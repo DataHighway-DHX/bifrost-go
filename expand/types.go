@@ -72,57 +72,6 @@ func (v *Vec) ProcessVec(decoder scale.Decoder, subType interface{}) error {
 	return nil
 }
 
-// /*
-// 解码包的问题，所以这里只能根据需求写死
-// */
-// type TransferCall struct {
-// 	Value interface{}
-// }
-
-// func (t *TransferCall) Decode(decoder scale.Decoder) error {
-// 	//1. Get callidx first
-// 	b := make([]byte, 2)
-// 	err := decoder.Read(b)
-// 	if err != nil {
-// 		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
-// 	}
-// 	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
-// 	result := map[string]interface{}{
-// 		"call_index": callIdx,
-// 	}
-// 	var param []ExtrinsicParam
-// 	// 0 ---> 	Address
-// 	var address MultiAddress
-// 	err = decoder.Decode(&address)
-// 	if err != nil {
-// 		return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
-// 	}
-// 	param = append(param,
-// 		ExtrinsicParam{
-// 			Name:     "dest",
-// 			Type:     "Address",
-// 			Value:    utils.BytesToHex(address.AccountId[:]),
-// 			ValueRaw: utils.BytesToHex(address.AccountId[:]),
-// 		})
-// 	// 1 ----> Compact<Balance>
-// 	var bb types.UCompact
-
-// 	err = decoder.Decode(&bb)
-// 	if err != nil {
-// 		return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
-// 	}
-// 	v := utils.UCompactToBigInt(bb).Int64()
-// 	param = append(param,
-// 		ExtrinsicParam{
-// 			Name:  "value",
-// 			Type:  "Compact<Balance>",
-// 			Value: v,
-// 		})
-// 	result["call_args"] = param
-// 	t.Value = result
-// 	return nil
-// }
-
 type Address struct {
 	AccountLength string `json:"account_length"`
 	Value         string
@@ -164,45 +113,6 @@ func (u *U32) Decode(decoder scale.Decoder) error {
 		return fmt.Errorf("decode u32 : read 4 bytes error: %v", err)
 	}
 	u.Value = binary.LittleEndian.Uint32(data)
-	return nil
-}
-
-// AccountInfo contains information of an account
-type StafiAccountInfo struct {
-	Nonce    types.U32
-	RefCount types.U8
-	Data     struct {
-		Free       types.U128
-		Reserved   types.U128
-		MiscFrozen types.U128
-		FreeFrozen types.U128
-	}
-}
-
-type WeightToFeeCoefficient struct {
-	CoeffInteger types.U128
-	CoeffFrac    U32
-	Negative     bool
-	Degree       types.U8
-}
-
-func (d *WeightToFeeCoefficient) Decode(decoder scale.Decoder) error {
-	err := decoder.Decode(&d.CoeffInteger)
-	if err != nil {
-		return fmt.Errorf("decode WeightToFeeCoefficient: decode CoeffInteger error: %v", err)
-	}
-	err = decoder.Decode(&d.CoeffFrac)
-	if err != nil {
-		return fmt.Errorf("decode WeightToFeeCoefficient: decode CoeffFrac error: %v", err)
-	}
-	err = decoder.Decode(&d.Negative)
-	if err != nil {
-		return fmt.Errorf("decode WeightToFeeCoefficient: decode Negative error: %v", err)
-	}
-	err = decoder.Decode(&d.Degree)
-	if err != nil {
-		return fmt.Errorf("decode WeightToFeeCoefficient: decode Degree error: %v", err)
-	}
 	return nil
 }
 
