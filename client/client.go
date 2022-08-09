@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/DataHighway-DHX/substrate-go/crypto/ss58"
+	"github.com/DataHighway-DHX/substrate-go/base"
 
 	"strings"
 
@@ -14,32 +14,42 @@ import (
 )
 
 type Client struct {
-	C                  *gsrc.SubstrateAPI
-	Meta               *types.Metadata
-	prefix             []byte
-	ChainName          string
-	SpecVersion        int
-	TransactionVersion int
-	genesisHash        string
-	url                string
+	API            *gsrc.SubstrateAPI
+	Meta           *types.Metadata
+	BasicType      *base.BasicTypes
+	RuntimeVersion *types.RuntimeVersion
+	prefix         []byte
+	genesisHash    types.Hash
+	url            string
+	NetId          uint8
 }
 
-func New(url string) (*Client, error) {
+func New(url string, noPalletIndices bool) (*Client, error) {
 	c := new(Client)
 	c.url = url
 	var err error
 
-	// 初始化rpc客户端
-	c.C, err = gsrc.NewSubstrateAPI(url)
+	c.BasicType, err = base.InitBasicTypesByHexData()
+	if err != nil {
+		return nil, fmt.Errorf("init base type error: %v", err)
+	}
+
+	c.API, err = gsrc.NewSubstrateAPI(url)
 	if err != nil {
 		return nil, err
 	}
-	//检查当前链运行的版本
+
 	err = c.checkRuntimeVersion()
 	if err != nil {
 		return nil, err
 	}
-	c.prefix = ss58.BifrostPrefix
+
+	netId, err := c.BasicType.GetNetworkId(c.RuntimeVersion.SpecName)
+	if err != nil {
+		return nil, err
+	}
+	c.NetId = netId
+	// expand.SetSerDeOptions(noPalletIndices)
 	return c, nil
 }
 
@@ -59,7 +69,7 @@ func (c *Client) reConnectWs() (*gsrc.SubstrateAPI, error) {
 }
 
 func (c *Client) checkRuntimeVersion() error {
-	v, err := c.C.RPC.State.GetRuntimeVersionLatest()
+	v, err := c.API.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
 		if !strings.Contains(err.Error(), "tls: use of closed connection") {
 			return fmt.Errorf("init runtime version error,err=%v", err)
@@ -68,22 +78,19 @@ func (c *Client) checkRuntimeVersion() error {
 		if err != nil {
 			return fmt.Errorf("reconnect error: %v", err)
 		}
-		c.C = cl
-		v, err = c.C.RPC.State.GetRuntimeVersionLatest()
+		c.API = cl
+		v, err = c.API.RPC.State.GetRuntimeVersionLatest()
 		if err != nil {
-			return fmt.Errorf("init runtime version error,aleady reconnect,err: %v", err)
+			return fmt.Errorf("init runtime version error, already reconnect,err: %v", err)
 		}
 	}
-	c.TransactionVersion = int(v.TransactionVersion)
-	c.ChainName = v.SpecName
-	specVersion := int(v.SpecVersion)
 
-	if specVersion != c.SpecVersion {
-		c.Meta, err = c.C.RPC.State.GetMetadataLatest()
+	if c.RuntimeVersion != v {
+		c.Meta, err = c.API.RPC.State.GetMetadataLatest()
 		if err != nil {
 			return fmt.Errorf("init metadata error: %v", err)
 		}
-		c.SpecVersion = specVersion
+		c.RuntimeVersion = v
 	}
 	return nil
 }
@@ -96,31 +103,31 @@ type ChainInfo struct {
 
 func (c *Client) ChainInfo() (ci *ChainInfo, err error) {
 	ci = &ChainInfo{}
-	ci.Chain, err = c.C.RPC.System.Chain()
+	ci.Chain, err = c.API.RPC.System.Chain()
 	if err != nil {
 		return nil, fmt.Errorf("cannot get chain info: %v", err)
 	}
-	ci.NodeName, err = c.C.RPC.System.Name()
+	ci.NodeName, err = c.API.RPC.System.Name()
 	if err != nil {
 		return nil, fmt.Errorf("cannot get name info: %v", err)
 	}
-	ci.NodeVersion, err = c.C.RPC.System.Version()
+	ci.NodeVersion, err = c.API.RPC.System.Version()
 	if err != nil {
 		return nil, fmt.Errorf("cannot get version info: %v", err)
 	}
 	return
 }
 
-func (c *Client) GetGenesisHash() string {
-	if c.genesisHash != "" {
-		return c.genesisHash
+func (c *Client) GetGenesisHash() (*types.Hash, error) {
+	if len(c.genesisHash.Hex()) != 0 {
+		return &c.genesisHash, nil
 	}
-	hash, err := c.C.RPC.Chain.GetBlockHash(0)
+	hash, err := c.API.RPC.Chain.GetBlockHash(0)
 	if err != nil {
-		return ""
+		return nil, fmt.Errorf("can't get genesis hash")
 	}
-	c.genesisHash = hash.Hex()
-	return hash.Hex()
+	c.genesisHash = hash
+	return &c.genesisHash, nil
 }
 
 // Customize the prefix. If the prefix loaded at startup is wrong, you need to configure the prefix manually
