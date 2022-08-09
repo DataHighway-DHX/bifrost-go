@@ -5,75 +5,33 @@ import (
 	"testing"
 
 	"github.com/DataHighway-DHX/substrate-go/client"
-	"github.com/DataHighway-DHX/substrate-go/crypto"
-	"github.com/DataHighway-DHX/substrate-go/expand"
-	"github.com/DataHighway-DHX/substrate-go/tx"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+	"github.com/vedhavyas/go-subkey"
 )
 
 func Test_Tx2(t *testing.T) {
 
-	c, err := client.New("")
+	c, err := client.New("wss://tanganika.datahighway.com", true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// If the address of some chains (eg: chainX) requires 0xff
-	//in front of the byte, then the following value is set to false
-
-	//expand.SetSerDeOptions(false)
-	from := ""
-	to := ""
+	senderSecret := ""
+	recieverAccId := ""
 	amount := uint64(10000000000)
+	tip := uint64(0)
 
-	// Get the nonce of the from address
-	acc, err := c.GetAccountInfo(from)
+	fromKp, err := signature.KeyringPairFromSecret(
+		senderSecret,
+		c.NetId)
+
+	from, err := subkey.SS58Address(fromKp.PublicKey[:], c.NetId)
+
+	fmt.Printf("from : %s to %s amount %d", from, recieverAccId, amount)
+
+	txHash, err := c.AuthorTransferAsset(senderSecret, recieverAccId, amount, tip)
 	if err != nil {
 		t.Fatal(err)
 	}
-	nonce := uint64(acc.Nonce)
-	// Create a substrate transaction, this method satisfies all
-	// chains that follow the transaction structure of substrate
-	transaction := tx.NewSubstrateTransaction(from, nonce)
-
-	// Initialize the metadata expansion structure
-	ed, err := expand.NewMetadataExpand(c.Meta)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Initialize the call method of Balances.transfer
-	call, err := ed.BalanceTransferCall(to, amount)
-	if err != nil {
-		t.Fatal(err)
-	}
-	/*
-		//Balances.transfer_keep_alive  call方法
-		btkac,err:=ed.BalanceTransferKeepAliveCall(to,amount)
-	*/
-
-	/*
-		toAmount:=make(map[string]uint64)
-		toAmount[to] = amount
-		//...
-		//true: user Balances.transfer_keep_alive  false: Balances.transfer
-		ubtc,err:=ed.UtilityBatchTxCall(toAmount,false)
-	*/
-
-	// Set the necessary parameters for the transaction
-	transaction.SetGenesisHashAndBlockHash(c.GetGenesisHash(), c.GetGenesisHash()).
-		SetSpecAndTxVersion(uint32(c.SpecVersion), uint32(c.TransactionVersion)).
-		SetCall(call) //设置call
-	// Signed transaction
-	sig, err := transaction.SignTransaction("", crypto.Sr25519Type)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var result interface{}
-	err = c.C.Client.Call(&result, "author_submitExtrinsic", sig)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// get txid
-	txid := result.(string)
-	fmt.Println(txid)
+	t.Logf("tx hash %s", txHash.Hex())
 }

@@ -18,7 +18,7 @@ import (
 根据height解析block，返回block是否包含交易
 */
 func (c *Client) GetBlockByNumber(height int64) (*models.BlockResponse, error) {
-	hash, err := c.C.RPC.Chain.GetBlockHash(uint64(height))
+	hash, err := c.API.RPC.Chain.GetBlockHash(uint64(height))
 	if err != nil {
 		return nil, fmt.Errorf("get block hash error:%v,height:%d", err, height)
 	}
@@ -37,7 +37,7 @@ func (c *Client) GetBlockByHash(blockHash types.Hash) (*models.BlockResponse, er
 	if err != nil {
 		return nil, err
 	}
-	block, err = c.C.RPC.Chain.GetBlock(blockHash)
+	block, err = c.API.RPC.Chain.GetBlock(blockHash)
 	if err != nil {
 		return nil, fmt.Errorf("get block error: %v", err)
 	}
@@ -72,7 +72,7 @@ func (c *Client) parseExtrinsic(blockHash, parentHash types.Hash, extrinsics []t
 		return exts, nil
 	}
 
-	c.Meta, err = c.C.RPC.State.GetMetadataLatest()
+	c.Meta, err = c.API.RPC.State.GetMetadataLatest()
 	if err != nil {
 		return nil, fmt.Errorf("cannot fetch latest metadata %v", err)
 	}
@@ -82,7 +82,7 @@ func (c *Client) parseExtrinsic(blockHash, parentHash types.Hash, extrinsics []t
 		return nil, fmt.Errorf("unable to create storage key:%v", err)
 	}
 
-	raw, err := c.C.RPC.State.GetStorageRaw(eventKey, blockHash)
+	raw, err := c.API.RPC.State.GetStorageRaw(eventKey, blockHash)
 	if err != nil {
 		return nil, fmt.Errorf("unable to query storage: %v", err)
 	}
@@ -217,7 +217,7 @@ func getLength(ext types.Extrinsic) (int, error) {
 
 func (c *Client) getPartialFee(ext types.Extrinsic, parentHash string) (string, error) {
 	var result map[string]interface{}
-	err := c.C.Client.Call(&result, "payment_queryInfo", ext, parentHash)
+	err := c.API.Client.Call(&result, "payment_queryInfo", ext, parentHash)
 	if err != nil {
 		return "", fmt.Errorf("get payment info error: %v", err)
 	}
