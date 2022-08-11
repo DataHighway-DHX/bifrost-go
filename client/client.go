@@ -119,7 +119,8 @@ func (c *Client) ChainInfo() (ci *ChainInfo, err error) {
 }
 
 func (c *Client) GetGenesisHash() (*types.Hash, error) {
-	if len(c.genesisHash.Hex()) != 0 {
+	emptyH := types.Hash{}
+	if c.genesisHash.Hex() != emptyH.Hex() {
 		return &c.genesisHash, nil
 	}
 	hash, err := c.API.RPC.Chain.GetBlockHash(0)
